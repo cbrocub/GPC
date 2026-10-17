@@ -1,0 +1,40 @@
+<!doctype html>
+<!--
+  Seminario practico: Tron Battle Grid
+
+  Plantilla preparada mediante "copiar y pegar" de los ejemplos del curso:
+  - Estructura de la pagina y Three.js: ej-base.html
+  - GLTFLoader (tambien carga .glb): ej-loader.html
+  - FBXLoader e inflate: ej-loader-fbx.html
+
+-->
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title>Proyecto - Base</title>
+    <style>
+      body {
+        background-color: #000;
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Contenedor de la aplicacion -->
+    <div id="container"></div>
+
+    <!-- Librerias  -->
+    <script src="lib/three.min_r140.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="lib/GLTFLoader.js"></script>
+    <script src="js/inflate.min.js"></script>
+    <script src="js/FBXLoader.js"></script>
+    <script src="js/personaje.js"></script>
+    <script src="js/juego.js"></script>
+    
+
+    <!-- Nuestro codigo: debe cargarse despues de las librerias -->
+    <script src="js/proyecto.js"></script>
+  </body>
+</html>
