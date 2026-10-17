@@ -357,41 +357,50 @@ function resolverColision(pos, xAnt, zAnt, R) {
   if (!esTransitable(pos.x, pos.z)) { pos.x = xAnt; pos.z = zAnt; }
 }
 
+var texLoader = new THREE.TextureLoader();
+
+// Función auxiliar para cargar texturas y que se repitan (tiling)
+function cargarTex(ruta, repX, repY) {
+  var tex = texLoader.load(ruta);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  if (repX && repY) tex.repeat.set(repX, repY);
+  return tex;
+}
 
 // ============================================================================
 //  MATERIALES COMPARTIDOS Y AYUDANTES (solo primitivas de three.js)
 // ============================================================================
 var MAT = {
-  maderaA:   new THREE.MeshLambertMaterial({ color: 0x8b5a2b }),
-  maderaB:   new THREE.MeshLambertMaterial({ color: 0x7a4d24 }),
-  maderaOsc: new THREE.MeshLambertMaterial({ color: 0x4e3218 }),
-  caja:      new THREE.MeshLambertMaterial({ color: 0xb98a4e }),
-  hormigon:  new THREE.MeshLambertMaterial({ color: 0xb8b8b0 }),
-  hormigonOsc: new THREE.MeshLambertMaterial({ color: 0x8a8a84 }),
-  edificio:  new THREE.MeshLambertMaterial({ color: 0xc9c4b8 }),
-  pared:     new THREE.MeshLambertMaterial({ color: 0xe8dcc0 }),
-  tejado:    new THREE.MeshLambertMaterial({ color: 0xa8402a, flatShading: true }),
-  ladrillo:  new THREE.MeshLambertMaterial({ color: 0x8c3b2b }),
-  puerta:    new THREE.MeshLambertMaterial({ color: 0x5a3a22 }),
+  maderaA:   new THREE.MeshLambertMaterial({ map: cargarTex('textures/Wood01_Color.jpg', 1, 1) }),
+  maderaB:   new THREE.MeshLambertMaterial({ map: cargarTex('textures/Wood01_Color.jpg', 1, 1) }),
+  maderaOsc: new THREE.MeshLambertMaterial({ map: cargarTex('textures/WoodDark_Color.jpg', 1, 1) }),
+  caja:      new THREE.MeshLambertMaterial({ map: cargarTex('textures/Box_Color.jpg', 1, 1) }),
+  hormigon:  new THREE.MeshLambertMaterial({ map: cargarTex('textures/Concrete01_Color.jpg', 2, 2) }),
+  hormigonOsc: new THREE.MeshLambertMaterial({ map: cargarTex('textures/Concrete02_Color.jpg', 2, 2) }),
+  edificio:  new THREE.MeshLambertMaterial({ map: cargarTex('textures/Plaster01_Color.jpg', 2, 2) }),
+  pared:     new THREE.MeshLambertMaterial({ map: cargarTex('textures/Bricks01_Color.jpg', 2, 2) }),
+  tejado:    new THREE.MeshLambertMaterial({ map: cargarTex('textures/Roof01_Color.jpg', 3, 3) }),
+  ladrillo:  new THREE.MeshLambertMaterial({ map: cargarTex('textures/Bricks02_Color.jpg', 1, 1) }),
+  muralla:   new THREE.MeshLambertMaterial({ map: cargarTex('textures/StoneWall01_Color.jpg', 4, 2) }), // Nuevo material
+  piedra:    new THREE.MeshLambertMaterial({ map: cargarTex('textures/StoneWall01_Color.jpg', 2, 2) }),      // Nuevo material
+  puerta:    new THREE.MeshLambertMaterial({ color: 0x5a3a22 }), // Sin textura (opcional)
   cristal:   new THREE.MeshPhongMaterial({ color: 0x7fb7d9, shininess: 90 }),
   metal:     new THREE.MeshPhongMaterial({ color: 0x333333, shininess: 40 }),
   goma:      new THREE.MeshLambertMaterial({ color: 0x1a1a1a }),
   amarillo:  new THREE.MeshLambertMaterial({ color: 0xe0b400 }),
-  barril:    new THREE.MeshLambertMaterial({ color: 0x8b2e2e }),
+  barril:    new THREE.MeshLambertMaterial({ map: cargarTex('textures/Wood01_Color.jpg', 1, 1) }),
   blanco:    new THREE.MeshLambertMaterial({ color: 0xf2f2f2 }),
   rojoFaro:  new THREE.MeshLambertMaterial({ color: 0xc0281e }),
   cristalFaro: new THREE.MeshPhongMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.45, shininess: 100 }),
   luzFaro:   new THREE.MeshBasicMaterial({ color: 0xfff2a0 }),
-  haz:       new THREE.MeshBasicMaterial({ color: 0xfff2a0, transparent: true, opacity: 0.16,
-                                           side: THREE.DoubleSide, depthWrite: false,
-                                           blending: THREE.AdditiveBlending }),
-  tronco:    new THREE.MeshLambertMaterial({ color: 0x6b4423 }),
+  haz:       new THREE.MeshBasicMaterial({ color: 0xfff2a0, transparent: true, opacity: 0.16, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
+  tronco:    new THREE.MeshLambertMaterial({ map: cargarTex('textures/Bark01_Color.jpg', 1, 2) }),
   hojaPino:  new THREE.MeshLambertMaterial({ color: 0x2e6b3a, flatShading: true }),
   hojaA:     new THREE.MeshLambertMaterial({ color: 0x5a9e3c, flatShading: true }),
   hojaB:     new THREE.MeshLambertMaterial({ color: 0x6fb04a, flatShading: true }),
-  telaRoja: new THREE.MeshLambertMaterial({ color: 0xcc3333, side: THREE.DoubleSide }),
-  telaAzul: new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
-  piedra:    new THREE.MeshLambertMaterial({ color: 0x7a7a7a }),
+  telaRoja:  new THREE.MeshLambertMaterial({ color: 0xcc3333, side: THREE.DoubleSide }),
+  telaAzul:  new THREE.MeshLambertMaterial({ color: 0x3366cc, side: THREE.DoubleSide }),
   oro:       new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 100 })
 };
 
@@ -456,6 +465,41 @@ function crearMuelleHormigon(largo, ancho, alto) {
   return g;
 }
 
+// ============================================================================
+//  MURALLAS Y TORRES
+// ============================================================================
+function crearTramoMuralla(ancho, alto, fondo) {
+  var g = new THREE.Object3D();
+  // Cuerpo principal de la muralla
+  g.add(caja(ancho, alto, fondo, MAT.muralla, 0, alto / 2, 0));
+  
+  // Almenas superiores (para dar aspecto de fortificación)
+  var numAlmenas = Math.floor(ancho / 2);
+  for (var i = 0; i < numAlmenas; i++) {
+    var x = -ancho / 2 + 1 + i * (ancho / numAlmenas);
+    // Almenas hacia el exterior y el interior
+    g.add(caja(1.2, 1, 0.6, MAT.muralla, x, alto + 0.5, fondo/2 - 0.3));
+    g.add(caja(1.2, 1, 0.6, MAT.muralla, x, alto + 0.5, -fondo/2 + 0.3));
+  }
+  // Pasillo de ronda de madera
+  g.add(caja(ancho, 0.2, fondo - 1.2, MAT.maderaOsc, 0, alto, 0));
+  return g;
+}
+
+function crearTorreMuralla(radio, alto) {
+  var g = new THREE.Object3D();
+  // Torre cilíndrica
+  g.add(cilindro(radio, radio + 0.5, alto, MAT.muralla, 0, alto / 2, 0, 16));
+  
+  // Almenas de la torre
+  for (var i = 0; i < 8; i++) {
+    var a = i * Math.PI / 4;
+    g.add(caja(1.2, 1.2, 1.2, MAT.muralla, Math.cos(a) * (radio - 0.4), alto + 0.6, Math.sin(a) * (radio - 0.4)));
+  }
+  // Suelo interior de la torre
+  g.add(cilindro(radio - 0.2, radio - 0.2, 0.2, MAT.maderaOsc, 0, alto, 0, 16));
+  return g;
+}
 
 // ============================================================================
 //  CAJAS Y BARRILES
@@ -713,19 +757,11 @@ var MAT_ROCA = new THREE.MeshLambertMaterial({
 });
 
 function crearRoca(tamano) {
-
-  var roca = new THREE.Mesh(
-    new THREE.DodecahedronGeometry(tamano, 0),
-    MAT_ROCA
-  );
-
+  var roca = new THREE.Mesh(new THREE.DodecahedronGeometry(tamano, 0), MAT.piedra);
   roca.scale.y = 0.6;
   roca.rotation.y = rnd() * Math.PI * 2;
-
-  // Las rocas no proyectan sombras para mantener el rendimiento.
   roca.castShadow = false;
   roca.receiveShadow = false;
-
   return roca;
 }
 
@@ -949,7 +985,7 @@ function crearPoblado() {
   console.log('Puerto en (' + PUERTO.x.toFixed(0) + ', ' + PUERTO.z.toFixed(0) +
               '), mirando al mar hacia (' + PUERTO.ux.toFixed(2) + ', ' + PUERTO.uz.toFixed(2) + ')');
 
-  // ---------------- Muelle de hormigón (s = 0) ----------------
+ // ---------------- Muelle de hormigón (s = 0) ----------------
   var LARGO_M = 16, ANCHO_M = 6, ALTO_M = 1.0;
   var muelle = crearMuelleHormigon(LARGO_M, ANCHO_M, ALTO_M);
   muelle.position.set(PUERTO.x, seaLevelY, PUERTO.z);
@@ -961,61 +997,93 @@ function crearPoblado() {
   registrarPlataforma(cM.x, cM.z, PUERTO.giro, ANCHO_M / 2, LARGO_M / 2, yMuelle);
   ocupados.push([cM.x, cM.z, 14]);
 
-  // Cajas apiladas y barriles sobre el muelle (coordenadas locales del muelle: x = lateral, z = largo)
-  // [lx, lz, nx, nz, niveles]  -> zigzag para dejar un pasillo libre
+ // Cajas apiladas y colisiones
   var pilas = [
     [-1.0,  5.2, 2, 3, 3],
     [ 1.5,  9.2, 1, 2, 2],
-    [-1.0, 12.0, 2, 2, 2],
-    [ 1.5, 14.6, 1, 1, 1]
+    [-1.0, 12.0, 2, 2, 2]
   ];
   pilas.forEach(function (p) {
     anadirPilaCajas(muelle, p[0], p[1], p[2], p[3], p[4], yMuelle - seaLevelY);
     var cp = aMundo(p[0], p[1]);
+    // Registramos la caja usando LADO_CAJA
     registrarCaja(cp.x, cp.z, PUERTO.giro, p[2] * LADO_CAJA / 2, p[3] * LADO_CAJA / 2);
   });
-  // Barriles
-  [[1.6, 2.5], [1.6, 3.4], [-1.9, 14.8]].forEach(function (b) {
-    var barril = crearBarril();
-    barril.position.set(b[0], yMuelle - seaLevelY, b[1]);
-    muelle.add(barril);
-    var cb = aMundo(b[0], b[1]);
-    registrarCirculo(cb.x, cb.z, 0.45);
+
+  // ---------------- PERÍMETRO: Murallas y Torres ----------------
+  var altoM = 6, gruesoM = 3;
+  // Torres en las 4 esquinas
+  colocarCircular(crearTorreMuralla(3, altoM + 2), -35, -10, 3);
+  colocarCircular(crearTorreMuralla(3, altoM + 2),  35, -10, 3);
+  colocarCircular(crearTorreMuralla(3, altoM + 2), -35, -85, 3);
+  colocarCircular(crearTorreMuralla(3, altoM + 2),  35, -85, 3);
+  
+// Tramos laterales divididos en 5 partes de 15 unidades de largo
+  for (var i = 0; i < 5; i++) {
+    var lOffset = -17.5 - (i * 15); 
+    
+    // Muro Izquierdo girado 90 grados (Math.PI / 2)
+    var wrapperIzq = new THREE.Object3D();
+    var tramoIzq = crearTramoMuralla(15, altoM, gruesoM);
+    tramoIzq.rotation.y = Math.PI / 2; 
+    wrapperIzq.add(tramoIzq);
+    // Nota que aquí le pasamos el "grueso" (3) como ancho, y "15" como fondo para las colisiones
+    colocarRectangular(wrapperIzq, -35, lOffset, gruesoM, 15); 
+
+    // Muro Derecho girado 90 grados (Math.PI / 2)
+    var wrapperDer = new THREE.Object3D();
+    var tramoDer = crearTramoMuralla(15, altoM, gruesoM);
+    tramoDer.rotation.y = Math.PI / 2;
+    wrapperDer.add(tramoDer);
+    colocarRectangular(wrapperDer, 35, lOffset, gruesoM, 15); 
+  }
+  // Muro frontal (con abertura central para el muelle)
+  var tramoFrontal = (70 - 10) / 2; // 10 unidades de apertura
+  colocarRectangular(crearTramoMuralla(tramoFrontal, altoM, gruesoM), -20, -10, tramoFrontal, gruesoM); // Frontal Izq
+  colocarRectangular(crearTramoMuralla(tramoFrontal, altoM, gruesoM),  20, -10, tramoFrontal, gruesoM); // Frontal Der
+
+
+  // ---------------- DISTRIBUCIÓN URBANA DENSA ----------------
+  
+  // Bloque 1: Puerto y Almacenes (l = -20)
+  colocarRectangular(crearEdificio(10, 8, 3), -20, -20, 10, 8);
+  colocarRectangular(crearEdificio(10, 8, 3),  20, -20, 10, 8);
+  colocarRectangular(crearCasa(6, 5, 3, 0xffffff), -8, -20, 6, 5); // Oficina puerto
+  colocarRectangular(crearCasa(6, 5, 3, 0xffffff),  8, -20, 6, 5);
+
+  // Bloque 2: Mercado y Santuario (l = -35)
+  colocarRectangular(crearSantuario(), -22, -35, 6, 6);
+  // Zona de puestos de mercado alineados
+  colocarRectangular(crearPuestoMercado('rojo'), -10, -32, 3, 2);
+  colocarRectangular(crearPuestoMercado('azul'), -10, -38, 3, 2);
+  colocarRectangular(crearPuestoMercado('rojo'),  10, -32, 3, 2);
+  colocarRectangular(crearPuestoMercado('azul'),  10, -38, 3, 2);
+  // Casas rodeando el mercado
+  colocarRectangular(crearCasa(7, 6, 3.2),  22, -35, 7, 6);
+
+  // Bloque 3: Plaza Central y Callejones (l = -52)
+  colocarCircular(crearMonumentoPlaza(), 0, -52, 2.5);
+  // Viviendas densas formando calles estrechas alrededor de la plaza
+  var casasDensas = [
+    [-18, -48, 5, 5, 3.5], [-24, -48, 5, 5, 3.0], 
+    [-18, -56, 5, 5, 3.0], [-24, -56, 5, 5, 3.2],
+    [ 18, -48, 6, 5, 3.0], [ 25, -48, 6, 5, 3.4],
+    [ 18, -56, 6, 5, 3.0], [ 25, -56, 5, 5, 3.0]
+  ];
+  casasDensas.forEach(function (c) {
+    colocarRectangular(crearCasa(c[2], c[3], c[4]), c[0], c[1], c[2], c[3]);
   });
 
- 
-  // ---------------- Faro ----------------
-  colocarCircular(crearFaro(), -34, -4, 3.0);
+  // Bloque 4: Zona militar y Edificios Administrativos (l = -72)
+  colocarRectangular(crearEdificio(14, 8, 4), 0, -72, 14, 8); // Edificio principal
+  colocarRectangular(crearCasa(6, 7, 3.5), -15, -72, 6, 7);
+  colocarRectangular(crearCasa(6, 7, 3.5),  15, -72, 6, 7);
+  
+  // Faro (Reubicado ligeramente para encajar en la muralla)
+  colocarCircular(crearFaro(), -35, -4, 3.0);
 
-// ---------------- Muelle (l = 0 a 16) ----------------
-  // (El muelle original se mantiene igual)
-
-  // ---------------- 1. Primer bloque: Casas y Edificios (l = -15) ----------------
-  colocarRectangular(crearCasa(6, 5, 3.2, 0xe8dcc0), -8, -15, 6, 5);
-  colocarRectangular(crearEdificio(8, 7, 3), 10, -15, 8, 7);
-
-  // ---------------- 2. Mercado y Santuario (l = -28) ----------------
-  colocarRectangular(crearSantuario(), -10, -28, 4, 4);
-  colocarRectangular(crearPuestoMercado('rojo'), 5, -27, 3, 2);
-  colocarRectangular(crearPuestoMercado('azul'), 9, -29, 3, 2);
-
-  // ---------------- 3. Plaza Central y Callejón (l = -42) ----------------
-  // Monumento central en la plaza
-  colocarCircular(crearMonumentoPlaza(), 0, -42, 2.5);
-  // Casas formando el callejón lateral
-  colocarRectangular(crearCasa(5, 5, 3.0, 0xd9e4c8), -12, -40, 5, 5);
-  colocarRectangular(crearCasa(5, 6, 3.0, 0xe6e0d0), -12, -47, 5, 6);
-
-  // ---------------- 4. Segundo bloque: Casas y Edificios (l = -55) ----------------
-  colocarRectangular(crearEdificio(9, 7, 4), 10, -55, 9, 7);
-  colocarRectangular(crearCasa(7, 5, 3.4, 0xf0d8c0), -8, -55, 7, 5);
-
-  // ---------------- 5. Torre de Vigilancia (l = -70, al fondo) ----------------
-  colocarRectangular(crearTorreVigilancia(), 0, -70, 4.5, 4.5);
-
-// ---------------- Punto de aparición del jugador ----------------
-  // l = 14 nos sitúa casi en la punta del muelle (que mide 16 de largo)
-  var spawn = aMundo(0, 14); 
+  // ---------------- Punto de aparición del jugador ----------------
+  var spawn = aMundo(0, 14); // Al final del muelle
   ocupados.push([spawn.x, spawn.z, 4]);
   
 
