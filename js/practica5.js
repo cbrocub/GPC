@@ -97,19 +97,15 @@ function texturaPared(fichero)
 }
 
 // P5, punto 7: habitacion (paredes) + mapa de entorno de la rotula.
-// Las MISMAS 6 imagenes (posx, negx, posy, negy, posz, negz) se usan
-// en las 6 caras de la habitacion y en el cubemap, de modo que la
-// rotula refleja exactamente la sala en la que esta el robot.
+
 function crearHabitacion()
 {
-    // Orden de THREE.CubeTexture / BoxGeometry: [+x, -x, +y, -y, +z, -z]
+   
     var caras = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
 
     // Mapa de entorno para la rotula
     mapaEntorno = new THREE.CubeTextureLoader().setPath(RUTA_IMAGENES).load(caras);
 
-    // Paredes: MeshBasicMaterial (sin iluminacion) para que se vean igual
-    // que en el cubemap, que tampoco esta iluminado
     var materialesHabitacion = caras.map(function(fichero) {
         return new THREE.MeshBasicMaterial({
             map: texturaPared(fichero),
@@ -120,8 +116,7 @@ function crearHabitacion()
     var ladoHabitacion = 1000; // mismo tamaño que el suelo (1000 x 1000)
     var geometriaHabitacion = new THREE.BoxGeometry(ladoHabitacion, ladoHabitacion, ladoHabitacion);
     var habitacion = new THREE.Mesh(geometriaHabitacion, materialesHabitacion);
-    // la baja 1 unidad para que su suelo no coincida exactamente con el
-    // suelo real (evita parpadeos por z-fighting entre ambos planos)
+  
     habitacion.position.y = ladoHabitacion / 2 - 1;
     scene.add(habitacion);
 }
@@ -165,9 +160,8 @@ function loadScene()
         return m;
     }
 
-    // --- Materiales y texturas de las piezas del robot (P5, puntos 3 y 4) ---
-    // Cada textura se carga desde images/. Para cambiar el aspecto de una
-    // pieza basta con cambiar el nombre del fichero.
+    // Materiales y texturas de las piezas del robot (P5, puntos 3 y 4) 
+   
     var matMetal = registrarMaterial(new THREE.MeshPhongMaterial({
         map: cargarTextura('metal_128.jpg', 2),
         shininess: 90, specular: 0x999999
@@ -178,8 +172,7 @@ function loadScene()
     })); // mate (Lambert): esparrago, disco
 
     // Rotula: metal dorado (textura metalica teñida) + reflejo del mapa de
-    // entorno (la habitacion). Con MixOperation el reflejo se mezcla con el
-    // color de la textura segun 'reflectivity'.
+    // entorno 
     var matRotula = registrarMaterial(new THREE.MeshPhongMaterial({
         map: cargarTextura('metal_128.jpg', 1),
         color: 0xffd479,
