@@ -16,10 +16,10 @@ const PERSONAJE_CFG = {
     // ------------------------------------------------------------------------
     modelo: 'models/personaje/personaje.fbx',     // <<< CAMBIAR: personaje (FBX "With Skin")
     anim: {
-        idle:   'models/personaje/idle.fbx',      // <<< CAMBIAR: animación parado
-        andar:  'models/personaje/walk.fbx',      // <<< CAMBIAR: animación andar
-        correr: 'models/personaje/run.fbx',       // <<< CAMBIAR: animación correr (o null)
-        saltar: 'models/personaje/jump.fbx'       // <<< CAMBIAR: animación saltar (o null)
+        idle:   './models/personaje/idle.fbx',      // <<< CAMBIAR: animación parado
+        andar:  './models/personaje/walk.fbx',      // <<< CAMBIAR: animación andar
+        correr: './models/personaje/run.fbx',       // <<< CAMBIAR: animación correr (o null)
+        saltar: './models/personaje/jump.fbx'       // <<< CAMBIAR: animación saltar (o null)
     },
     // Poned null en una animación si no la tenéis; el juego sigue funcionando.
     // ------------------------------------------------------------------------
