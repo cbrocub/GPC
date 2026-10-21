@@ -1,26 +1,21 @@
-// =============================================================
 // ESCENARIO: Isla del volcán
 // Terreno + mar + volcán + luces + puerto/poblado + personaje.
 // Basado en heightmap.js (generación del terreno) y en el estilo
-// de Practica2-5.js / s3-cam1.js (cámara, materiales, iluminación).
-// El personaje (Jugador) vive en personaje.js
-// =============================================================
+
 
 var renderer, scene, camera;
 var cameraControls;
 
-// Datos del heightmap, guardados para poder consultar la altura del
-// terreno en cualquier punto (apoya al personaje sobre el suelo)
+// Datos del heightmap, guardados para poder consultar la altura 
 var hm_data = null, hm_width, hm_height;
 
-// Parámetros de construcción de la isla (ajustables)
+// Parámetros de construcción de la isla 
 const scaleFactorXZ = 3.2;    // separación entre vértices en X/Z
 const scaleFactorY = 0.85;    // cuánto se exagera la altura
 const seaLevelY = 4;          // altura (en Y) a la que ponemos el plano de agua
 const craterRadiusWorld = 60; // radio aprox. de la caldera, en unidades de mundo
 
-// El pico del volcán está descentrado respecto al centro de la isla.
-// Coordenadas de mundo a partir de la posición del pico del heightmap
+
 const peakWorldX = 82;
 const peakWorldZ = -66;
 
@@ -129,7 +124,7 @@ function loadScene() {
     texturaIsla.minFilter = THREE.LinearMipmapLinearFilter;
     texturaIsla.magFilter = THREE.LinearFilter;
     texturaIsla.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    // Si tu build ya usa colorSpace, cambia la línea de abajo por:
+    
     // texturaIsla.colorSpace = THREE.SRGBColorSpace;
     if ('encoding' in texturaIsla) texturaIsla.encoding = THREE.sRGBEncoding;
 
@@ -140,10 +135,9 @@ function loadScene() {
 
     crearLavaCaldera();
 
-    // --- Puerto, casas, edificios, faro, cajas y árboles (con colisiones) ---
+    //  Puerto, casas, edificios, faro, cajas y árboles (con colisiones) 
     var puerto = crearPoblado();
 
-    // --- Personaje ---
     // El suelo es el terreno + cubiertas del embarcadero/muelle
     Jugador.cfg.funcionAltura = alturaSuelo;
     // Colisiones con obstáculos y límite del agua profunda
@@ -165,8 +159,7 @@ function loadScene() {
   crearLuces();
 }
 
-// Disco de "lava" al fondo de la caldera: MeshBasicMaterial para que
-// brille por sí mismo, igual que el Sol en s3-sistema-solar.js
+
 function crearLavaCaldera() {
   const alturaCaldera = hm_altura(peakWorldX, peakWorldZ);
 
@@ -201,7 +194,6 @@ function crearLuces() {
   const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.55);
   scene.add(luzAmbiental);
 
-  // "Sol": luz direccional (para el ciclo día/noche en la siguiente fase)
   const sol = new THREE.DirectionalLight(0xfff3d6, 0.9);
   sol.position.set(300, 400, 200);
   scene.add(sol);
@@ -213,7 +205,7 @@ function updateAspectRatio() {
   camera.updateProjectionMatrix();
 }
 
-// Altura del terreno en un punto del mundo (interpolación bilineal)
+// Altura del terreno en un punto del mundo 
 function hm_altura(worldX, worldZ) {
   if (hm_data == null) return 0;
   const fi = Math.min(Math.max(worldX / scaleFactorXZ + hm_height / 2, 0), hm_height - 1.001);
@@ -246,14 +238,12 @@ function render() {
 }
 
 
-// ============================================================================
 //  COLISIONES Y SUELO
 //   - colisionadores: círculos (árboles, faro, barriles) y cajas orientadas
 //     en el plano XZ (casas, edificios, pilas de cajas, barandillas)
 //   - plataformas: rectángulos con altura propia (cubiertas del embarcadero
 //     y del muelle) para poder caminar sobre el agua
-//   - agua profunda: no se puede entrar (salvo sobre una plataforma)
-// ============================================================================
+//   - agua profunda: no se puede entrar
 var colisionadores = [];
 var plataformas = [];
 var PROFUNDIDAD_MAX = 0.7;   // hasta qué profundidad se puede vadear
@@ -299,7 +289,6 @@ function esTransitable(x, z) {
   return hm_altura(x, z) > seaLevelY - PROFUNDIDAD_MAX || sobrePlataforma(x, z);
 }
 
-// Llamada por Jugador tras cada movimiento. Corrige pos.x / pos.z
 function resolverColision(pos, xAnt, zAnt, R) {
 
   // 1) Agua profunda: deslizar por un eje o quedarse donde estaba
@@ -368,9 +357,7 @@ function cargarTex(ruta, repX, repY) {
   return tex;
 }
 
-// ============================================================================
-//  MATERIALES COMPARTIDOS Y AYUDANTES (solo primitivas de three.js)
-// ============================================================================
+//  MATERIALES 
 var MAT = {
   maderaA:   new THREE.MeshLambertMaterial({ map: cargarTex('textures/Wood01_Color.jpg', 1, 1) }),
   maderaB:   new THREE.MeshLambertMaterial({ map: cargarTex('textures/Wood01_Color.jpg', 1, 1) }),
@@ -404,8 +391,7 @@ var MAT = {
   oro:       new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 100 })
 };
 
-// Generador pseudoaleatorio con semilla: el reparto es siempre el mismo,
-// así podemos revisar la distribución sin que cambie al recargar
+// Generador pseudoaleatorio con semilla
 var _semilla = 20241005;
 function rnd() {
   var t = (_semilla += 0x6D2B79F5);
@@ -435,10 +421,8 @@ function pendienteEn(x, z) {
 }
 
 
-// ============================================================================
-//  MUELLE DE HORMIGÓN (con bolardos y defensas de neumático)
+//  MUELLE DE HORMIGÓN
 //  Origen en el extremo de tierra; se extiende hacia +Z
-// ============================================================================
 function crearMuelleHormigon(largo, ancho, alto) {
   var g = new THREE.Object3D();
 
@@ -465,9 +449,8 @@ function crearMuelleHormigon(largo, ancho, alto) {
   return g;
 }
 
-// ============================================================================
+
 //  MURALLAS Y TORRES
-// ============================================================================
 function crearTramoMuralla(ancho, alto, fondo) {
   var g = new THREE.Object3D();
   // Cuerpo principal de la muralla
@@ -501,9 +484,7 @@ function crearTorreMuralla(radio, alto) {
   return g;
 }
 
-// ============================================================================
 //  CAJAS Y BARRILES
-// ============================================================================
 var LADO_CAJA = 1.1;
 
 function crearCaja(lado) {
@@ -550,10 +531,8 @@ function crearBarril() {
 }
 
 
-// ============================================================================
-//  CASA con tejado a dos aguas (frente hacia +Z)
+
 //  El tejado es un prisma triangular = cilindro de 3 lados, tumbado y escalado
-// ============================================================================
 function crearCasa(ancho, fondo, alto, colorPared) {
   var g = new THREE.Object3D();
 
@@ -596,9 +575,7 @@ function crearCasa(ancho, fondo, alto, colorPared) {
 }
 
 
-// ============================================================================
 //  EDIFICIO de hormigón con rejilla de ventanas y azotea
-// ============================================================================
 function crearEdificio(ancho, fondo, pisos) {
   var g = new THREE.Object3D();
   var altoPiso = 3, alto = pisos * altoPiso;
@@ -631,10 +608,7 @@ function crearEdificio(ancho, fondo, pisos) {
 }
 
 
-// ============================================================================
 //  FARO: torre cónica a franjas, galería con barandilla, linterna y haz de luz
-// ============================================================================
-// Material de haz de luz: se desvanece en los bordes (efecto fresnel) y con la distancia
 function crearMaterialHaz(intensidad, largo) {
   return new THREE.ShaderMaterial({
     uniforms: {
@@ -760,9 +734,7 @@ function crearFaro() {
 }
 
 
-// ============================================================================
 //  ÁRBOLES
-// ============================================================================
 function crearPino(altura) {
   var h = altura || 6;
   var g = new THREE.Object3D();
@@ -801,9 +773,7 @@ function crearArbolRedondo(altura) {
   return g;
 }
 
-// ============================================================================
-// ROCAS LIGERAS
-// ============================================================================
+// ROCAS
 
 var MAT_ROCA = new THREE.MeshLambertMaterial({
   color: 0x66635d,
@@ -819,9 +789,7 @@ function crearRoca(tamano) {
   return roca;
 }
 
-// ============================================================================
 //  TORRE DE VIGILANCIA (Madera)
-// ============================================================================
 function crearTorreVigilancia() {
   var g = new THREE.Object3D();
   var alto = 8;
@@ -849,9 +817,7 @@ function crearTorreVigilancia() {
   return g;
 }
 
-// ============================================================================
 //  PUESTOS DE MERCADO
-// ============================================================================
 function crearPuestoMercado(colorTela) {
   var g = new THREE.Object3D();
   var matTela = colorTela === 'rojo' ? MAT.telaRoja : MAT.telaAzul;
@@ -873,9 +839,7 @@ function crearPuestoMercado(colorTela) {
   return g;
 }
 
-// ============================================================================
 //  SANTUARIO
-// ============================================================================
 function crearSantuario() {
   var g = new THREE.Object3D();
   
@@ -900,9 +864,7 @@ function crearSantuario() {
   return g;
 }
 
-// ============================================================================
 //  PLAZA (Fuente/Monumento central)
-// ============================================================================
 function crearMonumentoPlaza() {
   var g = new THREE.Object3D();
   g.add(cilindro(2, 2.2, 0.4, MAT.hormigonOsc, 0, 0.2, 0, 16));
@@ -914,14 +876,9 @@ function crearMonumentoPlaza() {
 }
 
 
-// ============================================================================
 //  PUERTO: búsqueda automática de un buen punto de costa
-//  Prueba muchas direcciones desde el mar hacia el interior y puntúa:
-//  pendiente suave, agua profunda al final del muelle, terreno moderado
-//  tierra adentro y lejos del volcán.
-//  Si no te gusta el sitio, fija PUERTO_MANUAL = { x:..., z:..., ang:... }
-//  (ang en grados: dirección hacia el mar, 0 = +Z, 90 = +X)
-// ============================================================================
+// fija PUERTO_MANUAL = { x:..., z:..., ang:... }
+
 var PUERTO_MANUAL = null;   // <<< pon aquí tu propio punto cuando decidamos la distribución
 
 var PUERTO = null;          // {x, z, ux, uz, giro}
@@ -975,9 +932,7 @@ function aMundo(s, l) {
 }
 
 
-// ============================================================================
-//  COLOCACIÓN SOBRE EL TERRENO (con cimentación para pendientes)
-// ============================================================================
+//  COLOCACIÓN SOBRE EL TERRENO 
 var ocupados = [];   // [x, z, radio] zonas ocupadas (los árboles las evitan)
 
 // Edificio rectangular en (s,l) del puerto, frente hacia el mar
@@ -1024,11 +979,7 @@ function colocarCircular(obj, s, l, radio) {
 }
 
 
-// ============================================================================
 //  COMPOSICIÓN: puerto + faro + casas + edificios + bosque
-//  Todo en coordenadas del puerto (s = lateral, l = hacia el mar).
-//  Devuelve datos para colocar al jugador.
-// ============================================================================
 function crearPoblado() {
 
   var costa = buscarCosta();
@@ -1039,7 +990,7 @@ function crearPoblado() {
   console.log('Puerto en (' + PUERTO.x.toFixed(0) + ', ' + PUERTO.z.toFixed(0) +
               '), mirando al mar hacia (' + PUERTO.ux.toFixed(2) + ', ' + PUERTO.uz.toFixed(2) + ')');
 
- // ---------------- Muelle de hormigón (s = 0) ----------------
+ //  Muelle de hormigón 
   var LARGO_M = 16, ANCHO_M = 6, ALTO_M = 1.0;
   var muelle = crearMuelleHormigon(LARGO_M, ANCHO_M, ALTO_M);
   muelle.position.set(PUERTO.x, seaLevelY, PUERTO.z);
@@ -1064,7 +1015,7 @@ function crearPoblado() {
     registrarCaja(cp.x, cp.z, PUERTO.giro, p[2] * LADO_CAJA / 2, p[3] * LADO_CAJA / 2);
   });
 
-  // ---------------- PERÍMETRO: Murallas y Torres ----------------
+  // PERÍMETRO: Murallas y Torres 
   var altoM = 6, gruesoM = 3;
   // Torres en las 4 esquinas
   colocarCircular(crearTorreMuralla(3, altoM + 2), -35, -10, 3);
@@ -1097,7 +1048,7 @@ function crearPoblado() {
   colocarRectangular(crearTramoMuralla(tramoFrontal, altoM, gruesoM),  20, -10, tramoFrontal, gruesoM); // Frontal Der
 
 
-  // ---------------- DISTRIBUCIÓN URBANA DENSA ----------------
+  //  DISTRIBUCIÓN URBANA DENSA 
   
   // Bloque 1: Puerto y Almacenes (l = -20)
   colocarRectangular(crearEdificio(10, 8, 3), -20, -20, 10, 8);
@@ -1136,12 +1087,12 @@ function crearPoblado() {
   // Faro (Reubicado ligeramente para encajar en la muralla)
   colocarCircular(crearFaro(), -35, -4, 3.0);
 
-  // ---------------- Punto de aparición del jugador ----------------
+  //  Punto de aparición del jugador 
   var spawn = aMundo(0, 14); // Al final del muelle
   ocupados.push([spawn.x, spawn.z, 4]);
   
 
-  // ---------------- Bosque ----------------
+  //  Bosque 
   var centroBosque = aMundo(0, -55), radioBosque = 90;
   var plantados = 0, intentos = 0, MAX_ARBOLES = 70;
   while (plantados < MAX_ARBOLES && intentos < 1500) {
