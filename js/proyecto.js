@@ -634,16 +634,70 @@ function crearEdificio(ancho, fondo, pisos) {
 // ============================================================================
 //  FARO: torre cónica a franjas, galería con barandilla, linterna y haz de luz
 // ============================================================================
+// Material de haz de luz: se desvanece en los bordes (efecto fresnel) y con la distancia
+function crearMaterialHaz(intensidad, largo) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      color:      { value: new THREE.Color(0xfff2a0) },
+      intensidad: { value: intensidad },
+      largo:      { value: largo }
+    },
+    vertexShader: [
+      'varying float vAlong;',
+      'varying vec3 vNormal;',
+      'varying vec3 vView;',
+      'uniform float largo;',
+      'void main() {',
+      '  vAlong = position.x / largo;',                       // 0 en la lampara, 1 en el extremo
+      '  vNormal = normalize(normalMatrix * normal);',
+      '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
+      '  vView = normalize(-mv.xyz);',
+      '  gl_Position = projectionMatrix * mv;',
+      '}'
+    ].join('\n'),
+    fragmentShader: [
+      'uniform vec3 color;',
+      'uniform float intensidad;',
+      'varying float vAlong;',
+      'varying vec3 vNormal;',
+      'varying vec3 vView;',
+      'void main() {',
+      '  float borde = abs(dot(normalize(vNormal), normalize(vView)));',
+      '  borde = pow(borde, 2.5);',                            // bordes suaves: sin silueta dura
+      '  float dist = pow(clamp(1.0 - vAlong, 0.0, 1.0), 1.6);', // mas intensa cerca de la lampara
+      '  float punta = smoothstep(0.0, 0.06, vAlong);',        // evita un punto quemado en el origen
+      '  gl_FragColor = vec4(color * intensidad * borde * dist * punta, 1.0);',
+      '}'
+    ].join('\n'),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.DoubleSide
+  });
+}
+
 function crearHaz(largo, radio) {
   var haz = new THREE.Object3D();
-  var geo = new THREE.ConeGeometry(radio, largo, 16, 1, true);
-  geo.rotateZ(Math.PI / 2);          // vértice hacia -X, base hacia +X
-  geo.translate(largo / 2, 0, 0);    // vértice en el origen
-  var m1 = new THREE.Mesh(geo, MAT.haz);
-  var m2 = m1.clone();
-  m2.rotation.y = Math.PI;           // segundo haz, opuesto
-  haz.add(m1);
-  haz.add(m2);
+
+  // 3 capas concentricas: ancha y tenue + media + estrecha y brillante
+  var capas = [
+    { r: 1.00, k: 0.45 },
+    { r: 0.55, k: 0.60 },
+    { r: 0.25, k: 0.90 }
+  ];
+
+  capas.forEach(function (c) {
+    var geo = new THREE.ConeGeometry(radio * c.r, largo, 32, 1, true);
+    geo.rotateZ(Math.PI / 2);         // vertice hacia -X, base hacia +X
+    geo.translate(largo / 2, 0, 0);   // vertice en el origen
+    var mat = crearMaterialHaz(c.k, largo);
+
+    var m1 = new THREE.Mesh(geo, mat);
+    var m2 = m1.clone();
+    m2.rotation.y = Math.PI;          // segundo haz, opuesto
+    haz.add(m1);
+    haz.add(m2);
+  });
   return haz;
 }
 
