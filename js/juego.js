@@ -167,6 +167,67 @@ function suelo(s, l) {
   return { x: c.x, z: c.z, y: alturaSuelo(c.x, c.z) };
 }
 
+// ---------------- CIELO NOCTURNO (cubemap) ----------------
+// Carpeta con las 6 caras. Orden de three.js: +X, -X, +Y, -Y, +Z, -Z
+const CIELO_RUTA = 'images/cielo/';
+const CIELO_CARAS = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
+
+// Cubemap de reserva generado con canvas: degradado + estrellas
+function crearCieloProcedural(tam) {
+  tam = tam || 512;
+  var caras = [];
+  for (var i = 0; i < 6; i++) {
+    var cv = document.createElement('canvas');
+    cv.width = cv.height = tam;
+    var ctx = cv.getContext('2d');
+
+    var g = ctx.createLinearGradient(0, 0, 0, tam);
+    if (i === 2) {                       // +Y (cenit): oscuro uniforme
+      g.addColorStop(0, '#02030a'); g.addColorStop(1, '#02030a');
+    } else if (i === 3) {                // -Y (suelo): color del horizonte
+      g.addColorStop(0, '#1a2447'); g.addColorStop(1, '#1a2447');
+    } else {                             // laterales: oscuro arriba, mas claro en el horizonte
+      g.addColorStop(0, '#02030a'); g.addColorStop(0.55, '#0a0f1e'); g.addColorStop(1, '#1a2447');
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, tam, tam);
+
+    if (i !== 3) {                       // estrellas (no en la cara de abajo)
+      var n = i === 2 ? 220 : 140;
+      for (var k = 0; k < n; k++) {
+        var x = Math.random() * tam, y = Math.random() * tam * (i === 2 ? 1 : 0.8);
+        var r = Math.random() < 0.08 ? 1.8 : 0.8;
+        ctx.globalAlpha = 0.4 + Math.random() * 0.6;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    caras.push(cv);
+  }
+  var tex = new THREE.CubeTexture(caras);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function crearCielo() {
+  // 1) Siempre hay cielo: primero el procedural
+  scene.background = crearCieloProcedural(512);
+
+  // 2) Intentamos cargar el cubemap con texturas; si carga, sustituye al procedural
+  new THREE.CubeTextureLoader()
+    .setPath(CIELO_RUTA)
+    .load(CIELO_CARAS, function (tex) {
+      // Si tu build usa colorSpace en vez de encoding:
+      // tex.colorSpace = THREE.SRGBColorSpace;
+      if ('encoding' in tex) tex.encoding = THREE.sRGBEncoding;
+      scene.background = tex;
+      console.log('juego.js: cubemap del cielo cargado');
+    }, undefined, function () {
+      console.warn('juego.js: no se encontro el cubemap en ' + CIELO_RUTA + ', uso el cielo procedural');
+    });
+}
+
 function inicializarJuego() {
   scene.add(grupoJuego);
 
@@ -181,7 +242,8 @@ function inicializarJuego() {
     if (o.isAmbientLight) { o.color.set(0x5566aa); o.intensity = 0.45; }
     if (o.isDirectionalLight) { o.color.set(0x8899cc); o.intensity = 0.35; }
   });
-  renderer.setClearColor(new THREE.Color(0x0a0f1e));
+  renderer.setClearColor(new THREE.Color(0x0a0f1e));  // sigue sirviendo de fondo del minimapa
+  crearCielo();
   fogJuego = new THREE.Fog(0x0a0f1e, 60, 420);
   scene.fog = fogJuego;
 
@@ -491,10 +553,11 @@ function juegoRender() {
     // a recalcular los programas de TODOS los materiales cada frame) alejamos la niebla
     var nNear = fogJuego.near, nFar = fogJuego.far;
     fogJuego.near = 1e7; fogJuego.far = 2e7;
+    var fondoCielo = scene.background;     // <-- nuevo
+    scene.background = null;               // el minimapa usa el clearColor oscuro
     renderer.render(scene, cameraTop);
+    scene.background = fondoCielo;         // <-- nuevo
     fogJuego.near = nNear; fogJuego.far = nFar;
-    renderer.setScissorTest(false);
-    renderer.setViewport(0, 0, W, H);
   }
 }
 
